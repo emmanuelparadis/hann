@@ -19,8 +19,6 @@ If OpenMP is available on your system, parallel (multicore) code is compiled. Fo
 
 ## Background
 
-::: flushleft
-
 The Hopfield network [@Hopfield1982] is a type of neural network with
 $N$ (input) neurons which are either in state $-$1 or
 in state +1. These states are determined in order to minimize its global
@@ -46,7 +44,7 @@ input neurons, there are $2^N$ possible patterns, for example for $N=$
 ```r
 > N <- c(30, 60, 100)
 > 2^N
-1.073742e+09 1.152922e+18 1.267651e+30
+[1] 1.073742e+09 1.152922e+18 1.267651e+30
 ```
 
 Several studies tried to find if a Hopfield network can memorize as many
@@ -54,23 +52,31 @@ patterns as these numbers, e.g., [@Demircigil2017; @Kanter1987]. Krotov
 and Hopfield [@Krotov2016] proposed the following formula for the
 maximum number of these patterns ($M$):
 
-$$M=\frac{1}{2(2n-3)!!}\times\frac{N^{n-1}}{\ln N},$$ where $n$ is a
+$$M=\frac{1}{2(2n-3)!!}\times\frac{N^{n-1}}{\ln N},$$
+
+where $n$ is a
 parameter of the energy function. For example for the same values of $N$
 above and for $n=$ 2, 10, 20, and 30:
 
 ```r
-
-> \## double factorial (n!!) that we want vectorized to use with \> \##
-outer() below \> dfact \<- function(n)  + \## seq() is not vectorized on
-its 2nd arg. + x \<- mapply(seq, from = 1, to = n, by = 2) + sapply(x,
-prod) + \> \## eq. 6 in Krotov & Hopfield (2016) \> funM \<- function(N,
-n) + N\^(n - 1) / (2 \* dfact(2 \* n - 3) \* log(N)) \> n \<- c(2, 10,
-20, 30) \> o \<- outer(N, n, funM) \> dimnames(o) \<- list(paste(\"N
-=\", N), paste(\"n =\", n)) \> o
-
-n = 2 n = 10 n = 20 n = 30 N = 30 4.410212 8.396947e+04 2.083464e+05
-2.037472e+03 N = 60 7.327180 3.571403e+07 9.074098e+10 9.086758e+11 N =
-100 10.857362 3.150767e+09 1.323940e+15 2.192610e+18
+> ## double factorial (n!!) that we want vectorized to use with
+> ## outer() below
+> dfact <- function(n) {
++     ## seq() is not vectorized on its 2nd arg.
++     x <- mapply(seq, from = 1, to = n, by = 2)
++     sapply(x, prod)
++ }
+> ## eq. 6 in Krotov & Hopfield (2016)
+> funM <- function(N, n)
++     N^(n - 1) / (2 * dfact(2 * n - 3) * log(N))
+> n <- c(2, 10, 20, 30)
+> o <- outer(N, n, funM)
+> dimnames(o) <- list(paste("N =", N), paste("n =", n))
+> o
+            n = 2       n = 10       n = 20       n = 30
+N = 30   4.410212 8.396947e+04 2.083464e+05 2.037472e+03
+N = 60   7.327180 3.571403e+07 9.074098e+10 9.086758e+11
+N = 100 10.857362 3.150767e+09 1.323940e+15 2.192610e+18
 ```
 # Data Coding
 
