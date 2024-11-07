@@ -1,6 +1,6 @@
 # hann: Hopfield Artificial Neural Networks
 
-'hann' is a R package for building and optimizing Hopfield-based artificial neural networks. Its implementation was made from scratch with (notably):
+**hann** is a R package for building and optimizing Hopfield-based artificial neural networks. Its implementation was made from scratch with (notably):
 
 * Use of BLAS/LAPACK for most matrix operations.
 * All optimizations are coded in C (with efficient use of arrays).
@@ -15,7 +15,7 @@ hann must be compiled in the standard way for R packages. For the moment, there 
 
 It is recommended to have an efficient BLAS/LAPACK library installed on your system (e.g., OpenBLAS).
 
-If OpenMP is available on your system, parallel (multicore) code is compiled. For the moment, this is available only for the function hann1().
+If OpenMP is available on your system, parallel (multicore) code is compiled. For the moment, this is available only for the function `hann1()`.
 
 ## Examples
 
