@@ -78,21 +78,26 @@ N = 30   4.410212 8.396947e+04 2.083464e+05 2.037472e+03
 N = 60   7.327180 3.571403e+07 9.074098e+10 9.086758e+11
 N = 100 10.857362 3.150767e+09 1.323940e+15 2.192610e+18
 ```
-# Data Coding
+
+## Data Coding
 
 The patterns must be arranged in a matrix where each row represents a
 single pattern (so there are $K$ rows). The number of columns of this
 matrix is the number of input neurons ($N$).
 
-::: tcolorbox
-::: Sinput
-\> N \<- 60L \> K \<- 2000L \> xi \<- matrix(1L, K, N) \> p \<- 0.15 \#
-not smaller than 0.15 \> probs \<- c(p, 1 - p) \> v \<- c(-1L, 1L) \>
-set.seed(1) \> xi1 \<- t(replicate(1000, sample(v, N, TRUE, probs))) \>
-xi2 \<- t(replicate(1000, sample(v, N, TRUE, rev(probs)))) \> xi \<-
-rbind(xi1, xi2) \> stopifnot(nrow(unique(xi)) == K)
-:::
-:::
+```r
+> N <- 60L
+> K <- 2000L
+> xi <- matrix(1L, K, N)
+> p <- 0.15 # not smaller than 0.15
+> probs <- c(p, 1 - p)
+> v <- c(-1L, 1L)
+> set.seed(1)
+> xi1 <- t(replicate(1000, sample(v, N, TRUE, probs)))
+> xi2 <- t(replicate(1000, sample(v, N, TRUE, rev(probs))))
+> xi <- rbind(xi1, xi2)
+> stopifnot(nrow(unique(xi)) == K)
+```
 
 Before simulating the data, we called `set.seed(1)` to repeat
 consistently the results each time the code of this vignette is
@@ -102,7 +107,7 @@ it is more likely that the number of unique patterns is less than $K$.
 It is recommended to use only unique patterns in the subsequent
 analyses.
 
-# Building the Hopfield Network
+## Building the Hopfield Network
 
 The function `buildSigma()` finds a network with the lowest energy
 level. The algorithm starts from a random network; convergence to a low
@@ -115,31 +120,32 @@ is the default) and $n=30$.
 ```r
 > library(hann)
 > sigma20 <- buildSigma(xi, nrep = 10)
-
-1: Initial energy = -1.02e+25 Updated energy = -4.05e+29 2: Initial
-energy = -2.42e+26 Updated energy = 0 3: Initial energy = -2.00e+26
-Updated energy = 0 4: Initial energy = -3.84e+29 Updated energy = 0 5:
-Initial energy = -4.87e+25 Updated energy = -3.87e+35 6: Initial energy
-= -2.55e+29 Updated energy = 0 7: Initial energy = -1.02e+28 Updated
-energy = 0 8: Initial energy = -4.68e+25 Updated energy = 0 9: Initial
-energy = -5.03e+26 Updated energy = 0 10: Initial energy = -3.60e+29
-Updated energy = 0
+ 1:  Initial energy = -1.02e+25   Updated energy = -4.05e+29
+ 2:  Initial energy = -2.42e+26   Updated energy = 0
+ 3:  Initial energy = -2.00e+26   Updated energy = 0
+ 4:  Initial energy = -3.84e+29   Updated energy = 0
+ 5:  Initial energy = -4.87e+25   Updated energy = -3.87e+35
+ 6:  Initial energy = -2.55e+29   Updated energy = 0
+ 7:  Initial energy = -1.02e+28   Updated energy = 0
+ 8:  Initial energy = -4.68e+25   Updated energy = 0
+ 9:  Initial energy = -5.03e+26   Updated energy = 0
+10:  Initial energy = -3.60e+29   Updated energy = 0
 
 Final energy = -3.871808e+35
 ```
 
 ```r
 > sigma30 <- buildSigma(xi, n = 30, nrep = 10)
-
-
-1: Initial energy = -5.51e+37 Updated energy = -2.21e+53 2: Initial
-energy = -3.00e+42 Updated energy = 0 3: Initial energy = -2.56e+41
-Updated energy = 0 4: Initial energy = -3.22e+42 Updated energy =
--2.21e+53 5: Initial energy = -1.18e+39 Updated energy = -3.13e+44 6:
-Initial energy = -5.91e+42 Updated energy = 0 7: Initial energy =
--2.78e+41 Updated energy = 0 8: Initial energy = -6.08e+40 Updated
-energy = 0 9: Initial energy = -8.17e+43 Updated energy = -2.21e+53 10:
-Initial energy = -1.18e+47 Updated energy = 0
+ 1:  Initial energy = -5.51e+37   Updated energy = -2.21e+53
+ 2:  Initial energy = -3.00e+42   Updated energy = 0
+ 3:  Initial energy = -2.56e+41   Updated energy = 0
+ 4:  Initial energy = -3.22e+42   Updated energy = -2.21e+53
+ 5:  Initial energy = -1.18e+39   Updated energy = -3.13e+44
+ 6:  Initial energy = -5.91e+42   Updated energy = 0
+ 7:  Initial energy = -2.78e+41   Updated energy = 0
+ 8:  Initial energy = -6.08e+40   Updated energy = 0
+ 9:  Initial energy = -8.17e+43   Updated energy = -2.21e+53
+10:  Initial energy = -1.18e+47   Updated energy = 0
 
 Final energy = -2.214794e+53
 ```
@@ -148,9 +154,9 @@ Typically, around 20% of the repetitions convergence to the same
 (lowest) energy level. It is recommended to leave the default
 `nrep = 100`.
 
-# Optimizing the Parameters
+## Optimizing the Parameters
 
-The package [hann]{.sans-serif} has two functions to build neural
+The package **hann** has two functions to build neural
 networks: `hann1` and `hann3`. See their respective help pages where
 they are described.
 
@@ -160,7 +166,7 @@ patterns belong to the same class, and the last 1000 ones to another
 class:
 
 ```r
-> cl \<- rep(1:2, each = 1000)
+> cl <- rep(1:2, each = 1000)
 ```
 
 Considering that each pattern in the first class has, on average, 15% of
@@ -179,7 +185,7 @@ Error rate = 1927 / 2000
 INITIALIZATION -- iteration 0   obj_fun = 9499.376132
 Gradients done.
 
-iteration 1 obj_fun = 9499.376132Error rate = 0 / 2000
+iteration 1 obj_fun = 9499.376132   Error rate = 0 / 2000
 ```
 
 For the more complicated 3-layer network, we set a milder target for the convergence of the loss function:
@@ -187,15 +193,16 @@ For the more complicated 3-layer network, we set a milder target for the converg
 ```r
 > ctr$target <- 0.1
 > nt3 <- hann3(xi, sigma20, cl, control = ctr)
+  Error rate = 1354 / 2000
+INITIALIZATION -- iteration 0	obj_fun = 4633.223
+gradients done.
+  Error rate = 418 / 2000
 
-Error rate = 1354 / 2000 INITIALIZATION -- iteration 0 obj_fun =
-4633.223 gradients done. Error rate = 418 / 2000
+iteration 1	obj_fun = 2613.790  Error rate = 0 / 2000
 
-iteration 1 obj_fun = 2613.790 Error rate = 0 / 2000
+iteration 2	obj_fun = 1.178  Error rate = 0 / 2000
 
-iteration 2 obj_fun = 1.178 Error rate = 0 / 2000
-
-iteration 3 obj_fun = 0.004
+iteration 3	obj_fun = 0.004
 ```
 
 Both networks perform well and the optimization converged quickly.
@@ -209,12 +216,15 @@ with the training data:
 
 ```r
 > table(predict(nt1, xi, rawsignal = FALSE), cl)
-
-cl 1 2 1 1000 0 2 0 1000
-
+   cl
+       1    2
+  1 1000    0
+  2    0 1000
 > table(predict(nt3, xi, rawsignal = FALSE), cl)
-
-cl 1 2 1 1000 0 2 0 1000
+   cl
+       1    2
+  1 1000    0
+  2    0 1000
 ```
 
 A trivial test is to assess whether similar classifications could be
@@ -223,29 +233,26 @@ be done by repeating the above analyses after setting the number of
 iterations to zero:[^3]
 
 ```r
-Error rate = 1924 / 2000 INITIALIZATION -- iteration 0 obj_fun =
-8929.935524 Gradients done.
-
+> ctr$iterlim <- 0
+> nt0 <- hann1(xi, sigma20, cl, control = ctr)
+Error rate = 1924 / 2000
+INITIALIZATION -- iteration 0	obj_fun = 8929.935524
+Gradients done.
 > table(predict(nt0, xi, rawsignal = FALSE), cl)
-cl 1 2 1 43 967 2 957 33
-
-::: Sinput
-\> nt0b \<- hann3(xi, sigma20, cl, control = ctr)
-:::
-
-::: Soutput
-Error rate = 1845 / 2000 INITIALIZATION -- iteration 0 obj_fun =
-5202.224 gradients done.
-:::
-
-::: Sinput
-\> table(predict(nt0b, xi, rawsignal = FALSE), cl)
-:::
-
-::: Soutput
-cl 1 2 1 101 898 2 899 102
-:::
-:::
+   cl
+      1   2
+  1  43 967
+  2 957  33
+> nt0b <- hann3(xi, sigma20, cl, control = ctr)
+  Error rate = 1845 / 2000
+INITIALIZATION -- iteration 0	obj_fun = 5202.224
+gradients done.
+> table(predict(nt0b, xi, rawsignal = FALSE), cl)
+   cl
+      1   2
+  1 101 898
+  2 899 102
+```
 
 Clearly, random networks cannot identify our patterns.
 
@@ -276,10 +283,15 @@ We can now assess the (final) error rates:
 
 ```r
 > table(predict(net1, xi, rawsignal = FALSE), cl)
-cl 1 2 1 77 34 2 23 66
-
+   cl
+     1  2
+  1 77 34
+  2 23 66
 > table(predict(net3, xi, rawsignal = FALSE), cl)
-cl 1 2 1 99 0 2 1 100
+   cl
+      1   2
+  1  99   0
+  2   1 100
 ```
 
 The 3-layer net performed much better than the 1-layer one. Setting
@@ -288,7 +300,7 @@ The literature on neural networks states that networks with no hidden
 layer fail to solve some problems even with very small data sets
 [@Elman1990; @Krotov2016].
 
-# Perspectives
+## Perspectives
 
 The present document aims to give a quick overview of the possibilities
 of [hann]{.sans-serif}. The package is in its development stage; we see
