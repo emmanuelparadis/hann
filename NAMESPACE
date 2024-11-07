@@ -1,0 +1,11 @@
+useDynLib(hann, .registration = TRUE)
+
+export(buildSigma, control.hann, hann1, hann3)
+
+importFrom(stats, runif)
+
+S3method(predict, hann1)
+S3method(print, hann1)
+S3method(predict, hann3)
+S3method(print, hann3)
+
