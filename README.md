@@ -11,7 +11,7 @@ Hopfield networks have the property to be able to learn many patterns with a sma
 
 ## Installation
 
-hann must be compiled in the standard way for R packages. For the moment, there are no pre-compiled packages. A submission to CRAN is planned to happen soon.
+hann must be compiled in the standard way of R packages. For the moment, there are no pre-compiled packages. A submission to CRAN is planned to happen soon.
 
 It is recommended to have an efficient BLAS/LAPACK library installed on your system (e.g., OpenBLAS).
 

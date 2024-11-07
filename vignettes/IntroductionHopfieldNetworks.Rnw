@@ -1,0 +1,191 @@
+\documentclass[a4paper]{article}
+%\VignetteIndexEntry{Introduction to Hopfield Networks}
+%\VignettePackage{hann}
+\usepackage{ape,url}
+\author{Emmanuel Paradis}
+\title{Introduction to Hopfield Networks With the Package `\pkg{hann}'}
+
+\begin{document}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{formatcom=\color{darkblue}}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{formatcom=\color{black}\vspace{-1.5em}}
+
+\maketitle
+\tableofcontents\vspace*{1pc}\hrule
+
+<<echo=false,quiet=true>>=
+options(width = 80, prompt = "> ")
+@
+
+\vspace{1cm}
+
+\section{Hopfield Networks}
+The Hopfield network \cite{Hopfield1982} is a type of neural network with $N$ (input) neurons which are either in state $-$1 or in state +1. These states are determined in order to minimize its global energy level with respect to a list of $K$ ``patterns'' each of length $N$.
+
+In practice, the Hopfield network is coupled with other layers neurons which are themselves connected to $C$ classification (or output) neurons whose signals identify the patterns. The different layers are connected through matrices of weights. There are as many layers than there are weight matrices.\footnote{See \url{https://www.cs.toronto.edu/~lczhang/360/lec/w02/terms.html} for a very nice introduction to artificial neural networks.}
+
+The $K$ patterns are used to train the network, both to minimize the energy level of the Hopfield network and to find the parameter values that minimize the loss function (the discrepancy between the observed output signals and their expectations under the known classes of the patterns).
+
+Hopfield networks can ``memorize'' a large number of patterns. Giving $N$ input neurons, there are $2^N$ possible patterns, for example for $N=$ 30, 60, and 100:
+
+<<>>=
+N <- c(30, 60, 100)
+2^N
+@ 
+Several studies tried to find if a Hopfield network can memorize as many patterns as these numbers, e.g., \cite{Demircigil2017, Kanter1987}. Krotov and Hopfield \cite{Krotov2016} proposed the following formula for the maximum number of these patterns ($M$):
+
+\begin{displaymath}
+M=\frac{1}{2(2n-3)!!}\times\frac{N^{n-1}}{\ln N},
+\end{displaymath}
+where $n$ is a parameter of the energy function. For example for the same values of $N$ above and for $n=$ 2, 10, 20, and 30:
+
+<<>>=
+## double factorial (n!!) that we want vectorized to use with
+## outer() below
+dfact <- function(n) {
+    ## seq() is not vectorized on its 2nd arg.
+    x <- mapply(seq, from = 1, to = n, by = 2)
+    sapply(x, prod)
+}
+
+## eq. 6 in Krotov & Hopfield (2016)
+funM <- function(N, n)
+    N^(n - 1) / (2 * dfact(2 * n - 3) * log(N))
+
+n <- c(2, 10, 20, 30)
+o <- outer(N, n, funM)
+dimnames(o) <- list(paste("N =", N), paste("n =", n))
+o
+@
+
+\section{Data Coding}
+The patterns must be arranged in a matrix where each row represents a single pattern (so there are $K$ rows). The number of columns of this matrix is the number of input neurons ($N$).
+
+<<>>=
+N <- 60L
+K <- 2000L
+
+xi <- matrix(1L, K, N)
+
+p <- 0.15 # not smaller than 0.15
+probs <- c(p, 1 - p)
+v <- c(-1L, 1L)
+
+set.seed(1)
+xi1 <- t(replicate(1000, sample(v, N, TRUE, probs)))
+xi2 <- t(replicate(1000, sample(v, N, TRUE, rev(probs))))
+xi <- rbind(xi1, xi2)
+
+stopifnot(nrow(unique(xi)) == K)
+@ 
+Before simulating the data, we called \code{set.seed(1)} to repeat consistently the results each time the code of this vignette is executed. If the user wants to simulate other data, just delete the line or give another value to \code{set.seed()}. If a small value is given to \code{p}, it is more likely that the number of unique patterns is less than $K$. It is recommended to use only unique patterns in the subsequent analyses.
+
+\section{Building the Hopfield Network}
+The function \code{buildSigma()} finds a network with the lowest energy level. The algorithm starts from a random network; convergence to a low energy level depends on the initial state of the network. Thus, the algorithm is repeated 100 times (by default). For this document, we set the number of repetitions to 10 to avoid printing to many lines.\footnote{This function has the \code{quiet} (\F\ by default) to only return the network with the lowest energy level.} We try the function with two values of the energy parameter: $n=20$ (this is the default) and $n=30$.
+
+<<>>=
+library(hann)
+sigma20 <- buildSigma(xi, nrep = 10)
+@
+
+<<>>=
+sigma30 <- buildSigma(xi, n = 30, nrep = 10)
+@ 
+Typically, around 20\% of the repetitions convergence to the same (lowest) energy level. It is recommended to leave the default \code{nrep = 100}.
+
+\section{Optimizing the Parameters}
+
+The package \pkg{hann} has two functions to build neural networks: \code{hann1} and \code{hann3}. See their respective help pages where they are described.
+
+We now optimize both types of networks with the data simulated above. We first create a membership variable indicating that the first 1000 patterns belong to the same class, and the last 1000 ones to another class:
+
+<<>>=
+cl <- rep(1:2, each = 1000)
+@ 
+Considering that each pattern in the first class has, on average, 15\% of $-1$, while each pattern in the second class has, on average, 15\% of +1, these patterns are expected to be very similar within a class but very dissimilar between both classes.
+
+We can now optimize the neural nets asking to print the error rate at each iteration:
+
+<<>>=
+ctr <- control.hann()
+ctr$trace.error <- TRUE
+nt1 <- hann1(xi, sigma20, cl, control = ctr)
+@ 
+For the more complicated 3-layer network, we set a milder target for the convergence of the loss function:
+
+<<>>=
+ctr$target <- 0.1
+nt3 <- hann3(xi, sigma20, cl, control = ctr)
+@ 
+Both networks perform well and the optimization converged quickly.
+
+\section{Classification and Error Rates}
+The performance of the classification of a network is assessed with the (generic) function \code{predict}; thus, the help page is accessed with \code{?predict.hann1} (or \code{?predict.hann3}). We first assess the error rates with the training data:
+
+<<>>=
+table(predict(nt1, xi, rawsignal = FALSE), cl)
+table(predict(nt3, xi, rawsignal = FALSE), cl)
+@ 
+A trivial test is to assess whether similar classifications could be achieved with random parameters (i.e., unoptimized networks). This can be done by repeating the above analyses after setting the number of iterations to zero:\footnote{By default, \code{hann1()} and \code{hann3()} initialize the network parameters with random values.}
+
+<<>>=
+ctr$iterlim <- 0
+nt0 <- hann1(xi, sigma20, cl, control = ctr)
+table(predict(nt0, xi, rawsignal = FALSE), cl)
+
+nt0b <- hann3(xi, sigma20, cl, control = ctr)
+table(predict(nt0b, xi, rawsignal = FALSE), cl)
+@ 
+Clearly, random networks cannot identify our patterns.% We now assess the importance of minimizing the energy level of the Hopfield network (\code{sigma}) by generating a random sequence of $-$1 and +1 (we consider only the 3-layer network):
+%
+%<<>>=
+%sigma.rnd <- sample(v, N, TRUE)
+%ctr$iterlim <- 10
+%
+%nt0c <- hann1(xi, sigma.rnd, cl, control = ctr)
+%nt0d <- hann3(xi, sigma.rnd, cl, control = ctr)
+%
+%table(predict(nt0c, xi, rawsignal = FALSE), cl)
+%table(predict(nt0d, xi, rawsignal = FALSE), cl)
+%@ 
+
+We remember that both classes of patterns are fairly homogeneous but different each others. What if these patterns are totally random while still in two different classes? We try to assess this question by setting a small network with $N=30$ and $K=200$ patterns.
+
+<<>>=
+N <- 30
+K <- 200
+xi <- matrix(sample(v, K * N, TRUE), K, N)
+@ 
+The rest of the analyses is very similar to the above ones:
+
+<<>>=
+sigma <- buildSigma(xi, quiet = TRUE)
+cl <- rep(1:2, each = 100)
+ctr <- control.hann(iterlim = 1000, quiet = TRUE)
+net1 <- hann1(xi, sigma, cl, control = ctr)
+net3 <- hann3(xi, sigma, cl, control = ctr)
+@ 
+We used a larger number of iterations to make sure that the optimizations reached (if possible) a small value of the loss function. We can now assess the (final) error rates:
+
+<<>>=
+table(predict(net1, xi, rawsignal = FALSE), cl)
+table(predict(net3, xi, rawsignal = FALSE), cl)
+@ 
+The 3-layer net performed much better than the 1-layer one. Setting \code{iterlim} to a larger value can make the 3-layer network reach 0\% error. The literature on neural networks states that networks with no hidden layer fail to solve some problems even with very small data sets \cite{Elman1990, Krotov2016}.
+
+\section{Perspectives}
+The present document aims to give a quick overview of the possibilities of \pkg{hann}. The package is in its development stage; we see now the current and (possible) future lines of development.
+
+\begin{itemize}
+\item Parallelization: there is an early attempt to use multicore based on OMP in \code{hann1()}. Therefore, this cannot be used together with functions from the package \pkg{parallel}. On the other hand, it is possible to run several optimizations in parallel, for instance with \code{parallel::mclapply()} if the OMP-based parallelization is off.
+\item Preparing databases for training: some works have been started on DNA.
+\end{itemize}
+
+
+
+\bibliographystyle{plain}
+\bibliography{refs}
+%\setlength{\bibsep}{0pt}
+\addcontentsline{toc}{section}{References}
+
+\end{document}
+
