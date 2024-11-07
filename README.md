@@ -19,8 +19,8 @@ If OpenMP is available on your system, parallel (multicore) code is compiled. Fo
 
 ## Background
 
-The Hopfield network [@Hopfield1982] is a type of neural network with
-$N$ (input) neurons which are either in state $-$1 or
+The Hopfield network (Hopfield, 1982) is a type of neural network with
+$N$ (input) neurons which are either in state -1 or
 in state +1. These states are determined in order to minimize its global
 energy level with respect to a list of $K$ "patterns" each of length
 $N$.
@@ -48,8 +48,8 @@ input neurons, there are $2^N$ possible patterns, for example for $N=$
 ```
 
 Several studies tried to find if a Hopfield network can memorize as many
-patterns as these numbers, e.g., [@Demircigil2017; @Kanter1987]. Krotov
-and Hopfield [@Krotov2016] proposed the following formula for the
+patterns as these numbers (e.g., Demircigil et al., 2017; Kanter and Sompolinsky., 1987). Krotov
+and Hopfield (2016) proposed the following formula for the
 maximum number of these patterns ($M$):
 
 $$M=\frac{1}{2(2n-3)!!}\times\frac{N^{n-1}}{\ln N},$$
@@ -298,12 +298,12 @@ The 3-layer net performed much better than the 1-layer one. Setting
 `iterlim` to a larger value can make the 3-layer network reach 0% error.
 The literature on neural networks states that networks with no hidden
 layer fail to solve some problems even with very small data sets
-[@Elman1990; @Krotov2016].
+(Elman, 1990; Krotov and Hopfield, 2016).
 
 ## Perspectives
 
 The present document aims to give a quick overview of the possibilities
-of [hann]{.sans-serif}. The package is in its development stage; we see
+of **hann**. The package is in its development stage; we see
 now the current and (possible) future lines of development.
 
 -   Parallelization: there is an early attempt to use multicore based on
@@ -315,6 +315,22 @@ now the current and (possible) future lines of development.
 
 -   Preparing databases for training: some works have been started on
     DNA.
+    
+## References
+
+M. Demircigil, J. Heusel, M. Löwe, S. Upgang, and F. Vermet. On a model of associative
+memory with huge storage capacity. *Journal of Statistical Physics*, 168:288–299, 2017.
+
+J. L. Elman. Finding structure in time. *Cognitive Science*, 14:179–211, 1990.
+
+J. J. Hopfield. Neural networks and physical systems with emergent collective compu-
+tational abilities. *Proceedings of the National Academy of Sciences, USA*, 79:2554–2558,
+1982.
+
+I. Kanter and H. Sompolinsky. Associative recall of memory without errors. *Physical
+Review A*, 35:380–392, 1987.
+
+D. Krotov and J. J. Hopfield. arXiv.1606.01164, 2016.
 
 [^1]: See <https://www.cs.toronto.edu/~lczhang/360/lec/w02/terms.html>
     for a very nice introduction to artificial neural networks.
