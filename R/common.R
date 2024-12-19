@@ -1,3 +1,12 @@
+## common.R (2024-10-31)
+
+##   Common Code
+
+## Copyright 2024 Emmanuel Paradis
+
+## This file is part of the R-package `hann'.
+## See the file ../DESCRIPTION for licensing issues.
+
 .hann.ctrl <-
     list(iterlim = 100L, quiet = FALSE, quasinewton = FALSE,
          fullhessian = FALSE, trace.error = FALSE, wolfe = FALSE,

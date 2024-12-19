@@ -1,3 +1,12 @@
+## energy.R (2024-10-31)
+
+##   Energy Function for Hopfield ANN
+
+## Copyright 2024 Emmanuel Paradis
+
+## This file is part of the R-package `hann'.
+## See the file ../DESCRIPTION for licensing issues.
+
 buildSigma <- function(xi, n = 20, nrep = 100, quiet = FALSE)
 {
     n <- as.integer(n)

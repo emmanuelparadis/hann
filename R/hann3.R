@@ -1,3 +1,12 @@
+## hann3.R (2024-10-31)
+
+##   Three-layer Hopfield ANN
+
+## Copyright 2024 Emmanuel Paradis
+
+## This file is part of the R-package `hann'.
+## See the file ../DESCRIPTION for licensing issues.
+
 hann3 <- function(xi, sigma, classes, H = 0.5 * length(sigma),
                   net = NULL, control = control.hann())
 {

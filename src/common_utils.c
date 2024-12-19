@@ -1,3 +1,10 @@
+/* common_utils.c    2024-10-31 */
+
+/* Copyright 2024 Emmanuel Paradis */
+
+/* This file is part of the R-package `hann'. */
+/* See the file ../DESCRIPTION for licensing issues. */
+
 #ifndef  USE_FC_LEN_T
 # define USE_FC_LEN_T
 #endif

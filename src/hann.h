@@ -1,3 +1,10 @@
+/* hann.h    2024-10-31 */
+
+/* Copyright 2024 Emmanuel Paradis */
+
+/* This file is part of the R-package `hann'. */
+/* See the file ../DESCRIPTION for licensing issues. */
+
 #include <R.h>
 #include <Rinternals.h>
 #include <R_ext/Lapack.h>

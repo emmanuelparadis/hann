@@ -1,3 +1,12 @@
+## hann1.R (2024-10-31)
+
+##   One-layer Hopfield ANN
+
+## Copyright 2024 Emmanuel Paradis
+
+## This file is part of the R-package `hann'.
+## See the file ../DESCRIPTION for licensing issues.
+
 hann1 <- function(xi, sigma, classes, net = NULL, control = control.hann())
 {
     K <- nrow(xi)

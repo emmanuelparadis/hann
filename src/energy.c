@@ -1,3 +1,10 @@
+/* energy.c    2024-10-31 */
+
+/* Copyright 2024 Emmanuel Paradis */
+
+/* This file is part of the R-package `hann'. */
+/* See the file ../DESCRIPTION for licensing issues. */
+
 #include "hann.h"
 
 inline double F(double x, int n)
