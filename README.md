@@ -1,5 +1,13 @@
 # hann: Hopfield Artificial Neural Networks
 
+- [Installation](#installation)
+- [Background](#background)
+- [Data Coding](#data-coding)
+- [Building the Hopfield Network](#building-the-hopfield-network)
+- [Optimizing the Parameters](#optimizing-the-parameters)
+- [Perspectives](#perspectives)
+- [References](#references)
+
 **hann** is a R package for building and optimizing Hopfield-based artificial neural networks. Its implementation was made from scratch with (notably):
 
 * Use of BLAS/LAPACK for most matrix operations.
