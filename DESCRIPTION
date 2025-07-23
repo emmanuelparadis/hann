@@ -1,8 +1,8 @@
 Package: hann
-Version: 0.1
-Date: 2024-10-31
+Version: 1.0
+Date: 2025-07-23
 Title: Hopfield Artificial Neural Networks
 Authors@R: c(person("Emmanuel", "Paradis", role = c("aut", "cre", "cph"), email = "Emmanuel.Paradis@ird.fr", comment = c(ORCID = "0000-0003-3092-2199")))
-Description: [...].
+Description: Optimization of Hopfield artificial neural networks (Krotov and Hopfield, 2016, <doi:10.48550/ARXIV.1606.01164>). Implements one-layer and three-layer models; prediction is done with S3 methods.
 License: GPL-3
 
