@@ -1,14 +1,15 @@
-/* prototype_7.c    2024-10-31 */
+/* prototype_7.c    2025-07-23 */
 
-/* Copyright 2024 Emmanuel Paradis */
+/* Copyright 2024-2025 Emmanuel Paradis */
 
 /* This file is part of the R-package `hann'. */
 /* See the file ../DESCRIPTION for licensing issues. */
 
-#include "hann.h"
+#ifndef R_NO_REMAP
+# define R_NO_REMAP
+#endif
 
-#ifdef _OPENMP
-#include <omp.h>
+#include "hann.h"
 
 /* global parameters: */
 static int N, K, C, np1, npar, KC, mc_cores;
@@ -35,6 +36,13 @@ static int control_list[4];
 /* { */
 /*     memset(count, 0, mc_cores * sizeof(int)); */
 /* } */
+
+/* use the next #undef to check that the code works for machines
+   without omp.h (2025-07-23) */
+/* #undef _OPENMP */
+
+#ifdef _OPENMP
+#include <omp.h>
 
 double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_grad)
 {
@@ -303,7 +311,11 @@ double optimize_7(double *PARA, int *sigma, int *xi,
 
     double (*FUN)(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_grad);
 
+#ifdef _OPENMP
     if (mc_cores == 1) FUN = &objfun_7; else FUN = &objfun_7_OMP;
+#else
+    FUN = &objfun_7;
+#endif
 
     sigma_xi = (double*)R_alloc(K * N, sizeof(double));
 
@@ -447,22 +459,22 @@ SEXP test_7(SEXP W, SEXP BIAS, SEXP SIGMA, SEXP XI, SEXP EXPEC,
     int *sigma, *xi, *expec;
     double *w, *bias, val;
 
-    PROTECT(W = coerceVector(W, REALSXP));
-    PROTECT(BIAS = coerceVector(BIAS, REALSXP));
-    PROTECT(SIGMA = coerceVector(SIGMA, INTSXP));
-    PROTECT(XI = coerceVector(XI, INTSXP));
-    PROTECT(EXPEC = coerceVector(EXPEC, INTSXP));
-    PROTECT(ITERLIM = coerceVector(ITERLIM, INTSXP));
-    PROTECT(QUIET = coerceVector(QUIET, INTSXP));
-    PROTECT(CTRL = coerceVector(CTRL, INTSXP));
-    PROTECT(CONVERGENCE = coerceVector(CONVERGENCE, REALSXP));
-    PROTECT(beta = coerceVector(beta, REALSXP));
-    PROTECT(MC_CORES = coerceVector(MC_CORES, INTSXP));
+    PROTECT(W = Rf_coerceVector(W, REALSXP));
+    PROTECT(BIAS = Rf_coerceVector(BIAS, REALSXP));
+    PROTECT(SIGMA = Rf_coerceVector(SIGMA, INTSXP));
+    PROTECT(XI = Rf_coerceVector(XI, INTSXP));
+    PROTECT(EXPEC = Rf_coerceVector(EXPEC, INTSXP));
+    PROTECT(ITERLIM = Rf_coerceVector(ITERLIM, INTSXP));
+    PROTECT(QUIET = Rf_coerceVector(QUIET, INTSXP));
+    PROTECT(CTRL = Rf_coerceVector(CTRL, INTSXP));
+    PROTECT(CONVERGENCE = Rf_coerceVector(CONVERGENCE, REALSXP));
+    PROTECT(beta = Rf_coerceVector(beta, REALSXP));
+    PROTECT(MC_CORES = Rf_coerceVector(MC_CORES, INTSXP));
 
     /* set the global parameters */
-    N = ncols(XI);
-    K = nrows(XI);
-    C = ncols(EXPEC);
+    N = Rf_ncols(XI);
+    K = Rf_nrows(XI);
+    C = Rf_ncols(EXPEC);
     np1 = N * C;
     npar = np1 + C;
     KC = K * C;
@@ -492,5 +504,5 @@ SEXP test_7(SEXP W, SEXP BIAS, SEXP SIGMA, SEXP XI, SEXP EXPEC,
     memcpy(bias, PARA + np1, C * sizeof(double));
 
     UNPROTECT(11);
-    return ScalarReal(val);
+    return Rf_ScalarReal(val);
 }
