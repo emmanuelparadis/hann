@@ -96,7 +96,6 @@ matrix is the number of input neurons ($N$).
 ```r
 > N <- 60L
 > K <- 2000L
-> xi <- matrix(1L, K, N)
 > p <- 0.15 # not smaller than 0.15
 > probs <- c(p, 1 - p)
 > v <- c(-1L, 1L)
@@ -316,13 +315,14 @@ now the current and (possible) future lines of development.
 
 -   Parallelization: there is an early attempt to use multicore based on
     OMP in `hann1()`. Therefore, this cannot be used together with
-    functions from the package [parallel]{.sans-serif}. On the other
+    functions from the package **parallel**. On the other
     hand, it is possible to run several optimizations in parallel, for
     instance with `parallel::mclapply()` if the OMP-based
     parallelization is off.
 
--   Preparing databases for training: some works have been started on
-    DNA.
+-   Preparing databases for training.
+    
+-   Initializing parameters for optimization.
     
 ## References
 
