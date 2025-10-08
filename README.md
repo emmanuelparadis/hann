@@ -285,7 +285,7 @@ The rest of the analyses is very similar to the above ones:
 ```
 
 We used a larger number of iterations to make sure that the
-optimizations reached (if possible) a small value of the loss function.[^4]
+optimizations reached (if possible) a small value of the loss function.^4
 We can now assess the (final) error rates:
 
 ```r
