@@ -349,4 +349,4 @@ D. Krotov and J. J. Hopfield. arXiv.1606.01164, 2016.
 [^3]: By default, `hann1()` and `hann3()` initialize the network
     parameters with random values.
     
-[^4]: With these data, setting the hyperparameter $\beta$ to one (`ctr$beta <- 1`) makes convergence faster. However, it seems that the best value of $beta$ depends on the data.
+[^4]: With these data, setting the hyperparameter to one (`ctr$beta <- 1`) makes convergence faster. However, it seems that the best value of this hyperparameter depends on the data.
