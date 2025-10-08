@@ -21,7 +21,7 @@ Hopfield networks have the property to be able to learn many patterns with a sma
 
 hann must be compiled in the standard way of R packages. For the moment, there are no pre-compiled packages. A submission to CRAN is planned to happen soon.
 
-It is recommended to have an efficient BLAS/LAPACK library installed on your system (e.g., OpenBLAS).
+It is recommended to have an efficient BLAS/LAPACK library installed on your system (e.g., [OpenBLAS](https://github.com/OpenMathLib/OpenBLAS)).
 
 If OpenMP is available on your system, parallel (multicore) code is compiled. For the moment, this is available only for the function `hann1()`.
 
@@ -285,7 +285,7 @@ The rest of the analyses is very similar to the above ones:
 ```
 
 We used a larger number of iterations to make sure that the
-optimizations reached (if possible) a small value of the loss function.
+optimizations reached (if possible) a small value of the loss function.[^4]
 We can now assess the (final) error rates:
 
 ```r
@@ -348,3 +348,5 @@ D. Krotov and J. J. Hopfield. arXiv.1606.01164, 2016.
 
 [^3]: By default, `hann1()` and `hann3()` initialize the network
     parameters with random values.
+    
+[^4]: With these data, setting the hyperparameter $\beta$ to one (`ctr$beta <- 1`) makes convergence faster. However, it seems that the best value of $\beta$ depends on the data.
