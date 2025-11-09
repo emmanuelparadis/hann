@@ -1,3 +1,22 @@
+		CHANGES IN HANN VERSION 1.1-2
+
+
+BUG FIXES
+
+    o A bug has been fixed in the calculations of gradients of hann3()
+      so convergence should be improved (and faster).
+
+    o The code in prototype_6.c used to allocate new memory at each
+      iteration: this is fixed.
+
+
+OTHER CHANGES
+
+    o The internal code of hann3() has been optimised so it should be
+      at least twice faster.
+
+
+
 		CHANGES IN HANN VERSION 1.1
 
 

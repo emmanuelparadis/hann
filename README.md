@@ -343,7 +343,7 @@ D. Krotov and J. J. Hopfield. arXiv.1606.01164, 2016.
 [^1]: See <https://www.cs.toronto.edu/~lczhang/360/lec/w02/terms.html>
     for a very nice introduction to artificial neural networks.
 
-[^2]: This function has the `quiet` (`FALSE` by default) to only return
+[^2]: This function has the `quiet` option (`FALSE` by default) to only return
     the network with the lowest energy level.
 
 [^3]: By default, `hann1()` and `hann3()` initialize the network

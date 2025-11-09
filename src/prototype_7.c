@@ -340,8 +340,7 @@ double optimize_7(double *PARA, int *sigma, int *xi,
     ptr_grad[1] = new_GRAD;
 
     /* 1. calculate the intermediate products 'sigma_i * xi_{mu,i}'
-       only once (may take a lot of memory if K is large...
-       => can overwrite 'xi' instead?) */
+       only once */
     k = 0;
     for (i = 0; i < N; i++) {
 	s = (double)sigma[i];

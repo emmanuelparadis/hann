@@ -1,6 +1,6 @@
-/* common_utils.c    2024-10-31 */
+/* common_utils.c    2025-10-21 */
 
-/* Copyright 2024 Emmanuel Paradis */
+/* Copyright 2024-2025 Emmanuel Paradis */
 
 /* This file is part of the R-package `hann'. */
 /* See the file ../DESCRIPTION for licensing issues. */
@@ -15,6 +15,12 @@
 #endif
 
 #include "hann.h"
+
+double my_tanh(double x)
+{
+    double a = exp(2 * x);
+    return (a - 1)/(a + 1);
+}
 
 /* #include <stdint.h> */
 /* #define SCALING ((double)UINT32_MAX) / 2 */

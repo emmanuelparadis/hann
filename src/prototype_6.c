@@ -1,17 +1,21 @@
-/* prototype_6.c    2024-10-31 */
+/* prototype_6.c    2025-11-08 */
 
-/* Copyright 2024 Emmanuel Paradis */
+/* Copyright 2024-2025 Emmanuel Paradis */
 
 /* This file is part of the R-package `hann'. */
 /* See the file ../DESCRIPTION for licensing issues. */
 
 #include "hann.h"
+#include <time.h> //+
+
+clock_t t0; //+
 
 /* global parameters: */
 static int N, K, H, C, np1, np2, np3, npar, np_cumul2,
     np_cumul3, np_cumul4, KH, HC, KC, mc_cores;
 static double target, BETA, twiceBETA, twiceBETA_SQUARE,
     twiceBETA_CUBE;
+static double constant_1;
 
 /*
   control_list[0]: quasiNewton
@@ -31,13 +35,15 @@ unsigned char eval_grad[3];
    4th bit: B1
    5th bit: B2
 
-   eval_grad[1]: specifies which neuron(s) of W1 to compute the
-   gradients neurons
-   0: all
+   eval_grad[1]: specifies which neuron(s) of W1 to compute the gradients
+   0: all neurons
    1, ..., 255: 1st, ..., 255th neuron
 
    eval_grad[2]: id. for neurons of W2
 */
+
+/* arrays used at each iteration */
+double *O1, *O2, *O, *DEVIATION, *bar_O, *bar_O2, *S, *RES, *tmp_3d;
 
 void do_Gradients_W1(double *sigma_xi, double *w2, double *w3,
 		     double *bar_O2, double *O1, double *S,
@@ -56,28 +62,52 @@ void do_Gradients_W1(double *sigma_xi, double *w2, double *w3,
 	idx = what_k * N;
     }
 
+    /* store the triple product W3xW2xbar_O2 in a 3-entry array */
+    for (k = 0; k < H; k++) {
+	for (j = 0; j < C; j++) {
+	    for (mu = 0; mu < K; mu++) {
+		s = 0;
+		for (h = 0; h < H; h++)
+		    s += w3[h + j*H] * w2[k + h*H] * bar_O2[mu + h*K];
+		tmp_3d[k + j*H + mu*H*C] = s;
+	    }
+	}
+    }
+
+    //    int iK, jK, kK, k_jH; !! NOT GOOD !!
+
+//Rprintf("point_14 %ld\n", clock() - t0); //+
     for (k = from; k < to; k++) {
 	for (i = 0; i < N; i++) {
 	    a = 0;
+	    //	    iK = i * K;
+	    //	    kK = k * K;
 	    for (j = 0; j < C; j++) {
+		//		jK = j * K;
+		//		k_jH = k + j * H;
 		for (mu = 0; mu < K; mu++) {
-		    s = 0;
-		    for (h = 0; h < H; h++)
-			s += w3[h + j*H] * w2[k + h*H] * bar_O2[mu + h*K];
-		    a += twiceBETA_CUBE * S[mu + j*K] *
-			sigma_xi[mu + i*K] * bar(O1[mu + k*K]) * s;;
+		    /* s = 0; */
+		    /* dans la boucle ci-dessous: puisque le produit
+		       'w3[h + j*H] * w2[k + h*H]' ne depend pas de
+		       'mu', il est possible de le calculer en dehors */
+		    /* for (h = 0; h < H; h++)
+			s += w3[h + j*H] * w2[k + h*H] * bar_O2[mu + h*K]; */
+		    /* THIS IS NOW STORED IN tmp_3d (A THREE-ENTRY ARRAY) */
+		    s = tmp_3d[k+j*H + mu*HC];
+		    a += S[mu + j*K] * sigma_xi[mu + i*K] * bar(O1[mu + k*K]) * s;
 		}
 	    }
-	    gradient_W1[idx] = a;
-	    idx++;
+	    a *= constant_1; /* factorized out: 'C * K * twiceBETA_CUBE' */
+	    gradient_W1[idx++] = a;
 	}
     }
+//Rprintf("point_15 %ld\n", clock() - t0); //+
 }
 
 void do_Gradients_W2(double *w3, double *bar_O2, double *O1,
 		     double *S, double *gradient_W2, int what_h)
 {
-    int h, i, j, k, mu, idx, from, to;
+    int h, i, j, k, mu, /* idx,  */from, to;
     double a, s;
 
     if (what_h == -1 || what_h > H) { /* do all */
@@ -88,23 +118,30 @@ void do_Gradients_W2(double *w3, double *bar_O2, double *O1,
 	to = what_h + 1;
     }
 
+    //    int hK, kK; !! NOT GOOD !!
+
     for (h = from; h < to; h++) {
+	//	hK = h * K;
+	//	kK = k * K;
 	for (k = 0; k < H; k++) {
-	    idx = k + h*H;
 	    a = 0;
 	    for (j = 0; j < C; j++) {
-		s = twiceBETA_SQUARE * w3[h + j * H];
-		for (i = 0, mu = j*K; i < K; i++, mu++) {
-		    a += s * S[mu] * bar_O2[i + h*K] * O1[i + k*K];
-		}
+		s = 0;
+		for (i = 0, mu = j*K; i < K; i++, mu++)
+		    s += S[mu] * bar_O2[i + h*K] * O1[i + k*K];
+		s *= K * twiceBETA_SQUARE * w3[h + j*H]; /* factorized out from the previous loop */
+		a += s;
 	    }
-	    gradient_W2[idx] = a;
+	    gradient_W2[k + h * H] = a;
 	}
     }
 }
 
 double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
 {
+    t0 = clock();
+    //Rprintf("point_0 %ld\n", clock() - t0); //+
+
     int i, j, k, h, from, to;
     double val = 0, s, tmp;
 
@@ -123,30 +160,30 @@ double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
     gradient_W3 = gradient_W2 + np2;
     gradient_bias_HH = gradient_W3 + np3;
     gradient_bias_HC = gradient_bias_HH + H;
-
-    double *O1, *O2, *O, *DEVIATION;
-    O1 = (double*)R_alloc(KH, sizeof(double));
-    O2 = (double*)R_alloc(KH, sizeof(double));
-    O = (double*)R_alloc(KC, sizeof(double));
-
+//Rprintf("point_1 %ld\n", clock() - t0); //+
     /* 2. integrate the signals from the N input neurons to the H
        hidden neurons */
     fast_mat_prod_0(sigma_xi, w1, O1, K, H, N);
+//Rprintf("point_1.5 %ld\n", clock() - t0); //+
     for (i = 0; i < KH; i++)
-	O1[i] = tanh(BETA * O1[i]);
-
+	O1[i] = BETA * O1[i];
+//Rprintf("point_1.6 %ld\n", clock() - t0); //+
+    for (i = 0; i < KH; i++)
+	O1[i] = my_tanh(O1[i]);
+//Rprintf("point_2 %ld\n", clock() - t0); //+
     /* 3. modulate the signals of the H hidden neurons by their
        convolutions */
     fast_mat_prod_0(O1, w2, O2, K, H, H);
     k = 0;
+//Rprintf("point_2.5 %ld\n", clock() - t0); //+
     for (h = 0; h < H; h++) {
 	s = bias_HH[h];
 	for (i = 0; i < K; i++) {
-	    O2[k] = tanh(BETA * O2[k] + s);
+	    O2[k] = my_tanh(BETA * O2[k] + s);
 	    k++;
 	}
     }
-
+//Rprintf("point_3 %ld\n", clock() - t0); //+
     /* 4. integrate the signals of the H hidden neurons
        towards the C classif. neurons */
     fast_mat_prod_0(O2, w3, O, K, C, H);
@@ -154,18 +191,17 @@ double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
     for (j = 0; j < C; j++) {
 	s = bias_HC[j];
 	for (i = 0; i < K; i++) {
-	    O[k] = tanh(BETA * O[k] + s);
+	    O[k] = my_tanh(BETA * O[k] + s);
 	    k++;
 	}
     }
-
+//Rprintf("point_4 %ld\n", clock() - t0); //+
     if (control_list[2]) {
 	k = do_error_rate(E, O, K, C);
 	Rprintf("  Error rate = %d / %d\n", k, K);
     }
-
+//Rprintf("point_5 %ld\n", clock() - t0); //+
     if (eval_grad[0]) {
-	DEVIATION = (double*)R_alloc(KC, sizeof(double));
 	for (i = 0; i < KC; i++) {
 	    DEVIATION[i] = s = O[i] - E[i];
 	    val += s * s;
@@ -175,24 +211,19 @@ double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
 	    val += pow(O[i] - E[i], 2);
 	return val;
     }
-
+//Rprintf("point_6 %ld\n", clock() - t0); //+
     /****************************/
     /* the gradients start here */
     /****************************/
-
-    double *bar_O, *bar_O2, *S;
-    bar_O2 = (double*)R_alloc(KH, sizeof(double));
-    bar_O = (double*)R_alloc(KC, sizeof(double));
-    S = (double*)R_alloc(KC, sizeof(double));
 
     for (i = 0; i < KC; i++) {
 	tmp = bar_O[i] = bar(O[i]);
 	S[i] = DEVIATION[i] * tmp;
     }
-
+//Rprintf("point_7 %ld\n", clock() - t0); //+
     for (i = 0; i < KH; i++)
 	bar_O2[i] = bar(O2[i]);
-
+//Rprintf("point_8 %ld\n", clock() - t0); //+
     /* gradients of B2 */
     if (eval_grad[0] & 0x10) { // 0x10 = 0001 0000
 	from = 0; to = K;
@@ -204,7 +235,7 @@ double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
 	    from += K; to += K;
 	}
     }
-
+//Rprintf("point_9 %ld\n", clock() - t0); //+
     // matrix versions (only for W3 and B1)
 
     /* gradients of W3 */
@@ -213,11 +244,9 @@ double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
 	for (i = 0; i < HC ; i++)
 	    gradient_W3[i] *= twiceBETA;
     }
-
+//Rprintf("point_10 %ld\n", clock() - t0); //+
     /* gradients of B1 */
     if (eval_grad[0] & 0x08) { // 0x08 = 0000 1000
-	double *RES;
-	RES = (double*)R_alloc(HC, sizeof(double));
 
 	fast_mat_prod_4(S, bar_O2, RES, K, H, C);
 	/* we could do:
@@ -235,19 +264,19 @@ double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
 	}
     }
     // end of matrix versions
-
+//Rprintf("point_11 %ld\n", clock() - t0); //+
     /* gradients of W2 */
     if (eval_grad[0] & 0x02) { // 0x02 = 0000 0010
 	h = ((int)eval_grad[2]) - 1;
 	do_Gradients_W2(w3, bar_O2, O1, S, gradient_W2, h);
     }
-
+//Rprintf("point_12 %ld\n", clock() - t0); //+
     /* gradients of W1 */
     if (eval_grad[0] & 0x01) { // 0x01 = 0000 0001
 	i = ((int)eval_grad[1]) - 1;
 	do_Gradients_W1(sigma_xi, w2, w3, bar_O2, O1, S, gradient_W1, i);
     }
-
+//Rprintf("point_13 %ld\n", clock() - t0); //+
     /* FILE *fo/\* , *fb, *fb2, *fb3, *fb4, *fb5 *\/; */
     /* fo = fopen("o_", "w"); */
     /* fb = fopen("b_", "w"); */
@@ -433,8 +462,7 @@ double optimize_6(double *PARA, int *sigma, int *xi,
     ptr_grad[1] = new_GRAD;
 
     /* 1. calculate the intermediate products 'sigma_i * xi_{mu,i}'
-       only once (may take a lot of memory if K is large...
-       => can overwrite 'xi' instead???) */
+       only once */
     k = 0;
     for (i = 0; i < N; i++) {
 	s = (double)sigma[i];
@@ -612,6 +640,8 @@ SEXP test_6(SEXP W1, SEXP W2, SEXP W3, SEXP BIAS_HH, SEXP BIAS_HC,
     KC = K * C;
     HC = H * C;
 
+    constant_1 = C * K * twiceBETA_CUBE;
+
     memcpy(&control_list, INTEGER(CTRL), 4 * sizeof(int));
 
     target = REAL(TARGET)[0];
@@ -640,6 +670,17 @@ SEXP test_6(SEXP W1, SEXP W2, SEXP W3, SEXP BIAS_HH, SEXP BIAS_HC,
     memcpy(PARA + np_cumul2, w3, np3 * sizeof(double));
     memcpy(PARA + np_cumul3, bias_HH, H * sizeof(double));
     memcpy(PARA + np_cumul4, bias_HC, C * sizeof(double));
+
+    /* global arrays */
+    O1 = (double*)R_alloc(KH, sizeof(double));
+    O2 = (double*)R_alloc(KH, sizeof(double));
+    O = (double*)R_alloc(KC, sizeof(double));
+    DEVIATION = (double*)R_alloc(KC, sizeof(double));
+    bar_O2 = (double*)R_alloc(KH, sizeof(double));
+    bar_O = (double*)R_alloc(KC, sizeof(double));
+    S = (double*)R_alloc(KC, sizeof(double));
+    RES = (double*)R_alloc(HC, sizeof(double));
+    tmp_3d = (double*)R_alloc(HC * K, sizeof(double));
 
     res = optimize_6(PARA, sigma, xi, expec, iterlim,
 		     INTEGER(QUIET)[0]);

@@ -15,6 +15,7 @@
 
 #define bar(x) (1 - x * x)
 
+double my_tanh(double x);
 double runif_local();
 void fast_mat_prod_4(double *X, double *Y, double *Z, int n, int m, int p);
 void fast_mat_prod_0(double *X, double *Y, double *Z, int n, int m, int p);
