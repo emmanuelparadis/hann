@@ -1,4 +1,4 @@
-/* prototype_7.c    2025-07-23 */
+/* prototype_7.c    2025-11-17 */
 
 /* Copyright 2024-2025 Emmanuel Paradis */
 
@@ -44,6 +44,9 @@ static int control_list[4];
 #ifdef _OPENMP
 #include <omp.h>
 
+/* arrays used at each iteration */
+double *O7, *Deviation, *bar_O7;
+
 double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_grad)
 {
     omp_set_num_threads(mc_cores);
@@ -52,9 +55,7 @@ double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int ev
     int mu, i, j, k, idx;
     double val = 0, s, tmp;
 
-    double *w, *bias, *grad_W, *grad_bias, *O, *Deviation, *bar_O;
-
-    O = (double*)R_alloc(KC, sizeof(double));
+    double *w, *bias, *grad_W, *grad_bias;
 
     w = PARA;
     bias = PARA + np1;
@@ -62,28 +63,25 @@ double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int ev
     if (eval_grad) {
 	grad_W = GRAD;
 	grad_bias = GRAD + np1;
-
-	Deviation = (double*)R_alloc(KC, sizeof(double));
-	bar_O = (double*)R_alloc(KC, sizeof(double));
     }
 
     /* 2. integrate the signals from the N input neurons to the C
        classification neurons */
-    fast_mat_prod_0(sigma_xi, w, O, K, C, N);
+    fast_mat_prod_0(sigma_xi, w, O7, K, C, N);
 
 #pragma omp parallel for// shared(KC, O, bias, BETA) private(i)
     for (i = 0; i < KC; i++)
-	O[i] = tanh(BETA * O[i] + bias[i/K]); // integer division (i/K)
+	O7[i] = my_tanh(BETA * O7[i] + bias[i/K]); // integer division (i/K)
 
     if (control_list[2]) {
-	k = do_error_rate(E, O, K, C);
+	k = do_error_rate(E, O7, K, C);
 	Rprintf("Error rate = %d / %d\n", k, K);
     }
 
     if (eval_grad) {
 #pragma omp parallel for// shared(KC, O, bar_O) private(i)
 	for (i = 0; i < KC; i++)
-	    bar_O[i] = bar(O[i]);
+	    bar_O7[i] = bar(O7[i]);
     }
 
 /*
@@ -112,12 +110,12 @@ double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int ev
 
     if (eval_grad) {
 	for (i = 0; i < KC; i++) {
-	    Deviation[i] = s = O[i] - E[i];
+	    Deviation[i] = s = O7[i] - E[i];
 	    val += s * s;
 	}
     } else {
 	for (i = 0; i < KC; i++)
-	    val += pow(O[i] - E[i], 2);
+	    val += pow(O7[i] - E[i], 2);
 	return val;
     }
 
@@ -136,7 +134,7 @@ double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int ev
 	    idx = j * K;
 	    for (mu = 0; mu < K; mu++) {
 		// idx = mu + j*K;
-		s += sigma_xi[mu + i*K] * bar_O[idx] * Deviation[idx];
+		s += sigma_xi[mu + i*K] * bar_O7[idx] * Deviation[idx];
 		idx++;
 	    }
 	    grad_W[k++] = tmp * s; // k = i + j*N
@@ -148,7 +146,7 @@ double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int ev
 	s = 0;
 	for (mu = 0; mu < K; mu++) {
 	    idx = mu + j*K;
-	    s += bar_O[idx] * Deviation[idx];
+	    s += bar_O7[idx] * Deviation[idx];
 	}
 	grad_bias[j]  = 2 * s;
     }
@@ -189,9 +187,7 @@ double objfun_7(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_g
     int mu, i, j, k, idx;
     double val = 0, s, tmp;
 
-    double *w, *bias, *grad_W, *grad_bias, *O, *Deviation, *bar_O;
-
-    O = (double*)R_alloc(KC, sizeof(double));
+    double *w, *bias, *grad_W, *grad_bias;
 
     w = PARA;
     bias = PARA + np1;
@@ -199,36 +195,33 @@ double objfun_7(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_g
     if (eval_grad) {
 	grad_W = GRAD;
 	grad_bias = GRAD + np1;
-
-	Deviation = (double*)R_alloc(KC, sizeof(double));
-	bar_O = (double*)R_alloc(KC, sizeof(double));
     }
 
     /* 2. integrate the signals from the N input neurons to the C
        classification neurons */
-    fast_mat_prod_0(sigma_xi, w, O, K, C, N);
+    fast_mat_prod_0(sigma_xi, w, O7, K, C, N);
 
     for (i = 0; i < KC; i++)
-	O[i] = tanh(BETA * O[i] + bias[i/K]); // integer division (i/K)
+	O7[i] = my_tanh(BETA * O7[i] + bias[i/K]); // integer division (i/K)
 
     if (control_list[2]) {
-	k = do_error_rate(E, O, K, C);
+	k = do_error_rate(E, O7, K, C);
 	Rprintf("Error rate = %d / %d\n", k, K);
     }
 
     if (eval_grad) {
 	for (i = 0; i < KC; i++)
-	    bar_O[i] = bar(O[i]);
+	    bar_O7[i] = bar(O7[i]);
     }
 
     if (eval_grad) {
 	for (i = 0; i < KC; i++) {
-	    Deviation[i] = s = O[i] - E[i];
+	    Deviation[i] = s = O7[i] - E[i];
 	    val += s * s;
 	}
     } else {
 	for (i = 0; i < KC; i++)
-	    val += pow(O[i] - E[i], 2);
+	    val += pow(O7[i] - E[i], 2);
 	return val;
     }
 
@@ -247,7 +240,7 @@ double objfun_7(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_g
 	    idx = j * K;
 	    for (mu = 0; mu < K; mu++) {
 		// idx = mu + j*K;
-		s += sigma_xi[mu + i*K] * bar_O[idx] * Deviation[idx];
+		s += sigma_xi[mu + i*K] * bar_O7[idx] * Deviation[idx];
 		idx++;
 	    }
 	    grad_W[k++] = tmp * s; // k = i + j*N
@@ -259,7 +252,7 @@ double objfun_7(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_g
 	s = 0;
 	for (mu = 0; mu < K; mu++) {
 	    idx = mu + j*K;
-	    s += bar_O[idx] * Deviation[idx];
+	    s += bar_O7[idx] * Deviation[idx];
 	}
 	grad_bias[j]  = 2 * s;
     }
@@ -285,7 +278,7 @@ void do_Hessian(double *PARA, double *sigma_xi, int *E,
 {
     int i, j, k = 0;
     double delta = 1E-8, *new_grad, tmp;
-    new_grad = (double*)R_alloc(npar, sizeof(double));
+    new_grad = malloc(npar * sizeof(double));
 
     for (i = 0; i < npar; i++) {
 	tmp = PARA[i];
@@ -295,6 +288,8 @@ void do_Hessian(double *PARA, double *sigma_xi, int *E,
 	    hessian[k++] = (new_grad[j] - GRAD[j]) / delta;
 	PARA[i] = tmp;
     }
+
+    free(new_grad);
 }
 
 #define COMPUTE_PROPOSED_PARA				\
@@ -494,6 +489,11 @@ SEXP test_7(SEXP W, SEXP BIAS, SEXP SIGMA, SEXP XI, SEXP EXPEC,
     PARA = (double*)R_alloc(npar, sizeof(double));
     memcpy(PARA, w, np1 * sizeof(double));
     memcpy(PARA + np1, bias, C * sizeof(double));
+
+    /* global arrays */
+    O7 = (double*)R_alloc(KC, sizeof(double));
+    Deviation = (double*)R_alloc(KC, sizeof(double));
+    bar_O7 = (double*)R_alloc(KC, sizeof(double));
 
     val = optimize_7(PARA, sigma, xi, expec, INTEGER(ITERLIM)[0],
 		     INTEGER(QUIET)[0]);

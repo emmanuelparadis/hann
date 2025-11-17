@@ -1,4 +1,4 @@
-/* prototype_6.c    2025-11-08 */
+/* prototype_6.c    2025-11-17 */
 
 /* Copyright 2024-2025 Emmanuel Paradis */
 
@@ -305,7 +305,7 @@ void do_Hessian_block(double *PARA, double *sigma_xi, int *E,
 {
     int i, j, from = 0;
     double delta = 1E-8, *new_grad, tmp, s;
-    new_grad = (double*)R_alloc(npar, sizeof(double));
+    new_grad = malloc(npar * sizeof(double));
 
     memset(hessian, 0, npar * npar * sizeof(double));
 
@@ -390,6 +390,7 @@ void do_Hessian_block(double *PARA, double *sigma_xi, int *E,
 	// if (i > np_cumul4 && !(i % H)) from += H;
     }
 
+    free(new_grad);
     return;
 
     /* do the rest of the parameters "full row" */
@@ -415,7 +416,7 @@ void do_Hessian_full(double *PARA, double *sigma_xi, int *E,
 {
     int i, j, k = 0;
     double delta = 1E-8, *new_grad, tmp;
-    new_grad = (double*)R_alloc(npar, sizeof(double));
+    new_grad = malloc(npar * sizeof(double));
 
     for (i = 0; i < npar; i++) {
 	tmp = PARA[i];
@@ -425,6 +426,8 @@ void do_Hessian_full(double *PARA, double *sigma_xi, int *E,
 	    hessian[k++] = (new_grad[j] - GRAD[j]) / delta;
 	PARA[i] = tmp;
     }
+
+    free(new_grad);
 }
 
 #define COMPUTE_PROPOSED_PARA				\
