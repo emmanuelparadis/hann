@@ -13,7 +13,8 @@
   See the vignette of this package for an example and some background.
 }
 \usage{
-hann1(xi, sigma, classes, net = NULL, control = control.hann())
+hann1(xi, sigma, classes, labels = NULL,
+      net = NULL, control = control.hann())
 
 \method{print}{hann1}(x, details = FALSE, ...)
 }
@@ -21,6 +22,7 @@ hann1(xi, sigma, classes, net = NULL, control = control.hann())
   \item{xi}{a matrix of patterns with K rows.}
   \item{sigma}{a vector coding the Hopfield network.}
   \item{classes}{the classes of the patterns (vector of length K).}
+  \item{labels}{a vector of labels used for the classes.}
   \item{net, x}{an object of class \code{"hann1"}.}
   \item{control}{the control parameters.}
   \item{details}{a logical value (whether to print the parameter values

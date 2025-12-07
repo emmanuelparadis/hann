@@ -1,4 +1,4 @@
-/* prototype_6.c    2025-11-17 */
+/* prototype_6.c    2025-11-25 */
 
 /* Copyright 2024-2025 Emmanuel Paradis */
 
@@ -6,9 +6,9 @@
 /* See the file ../DESCRIPTION for licensing issues. */
 
 #include "hann.h"
-#include <time.h> //+
+//#include <time.h> //+
 
-clock_t t0; //+
+//clock_t t0; //+
 
 /* global parameters: */
 static int N, K, H, C, np1, np2, np3, npar, np_cumul2,
@@ -139,7 +139,7 @@ void do_Gradients_W2(double *w3, double *bar_O2, double *O1,
 
 double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
 {
-    t0 = clock();
+    //    t0 = clock();
     //Rprintf("point_0 %ld\n", clock() - t0); //+
 
     int i, j, k, h, from, to;
@@ -198,7 +198,7 @@ double objfun_6(double *PARA, double *sigma_xi, int *E, double *GRAD)
 //Rprintf("point_4 %ld\n", clock() - t0); //+
     if (control_list[2]) {
 	k = do_error_rate(E, O, K, C);
-	Rprintf("  Error rate = %d / %d\n", k, K);
+	Rprintf("\tError rate = %d / %d", k, K);
     }
 //Rprintf("point_5 %ld\n", clock() - t0); //+
     if (eval_grad[0]) {
@@ -479,7 +479,10 @@ double optimize_6(double *PARA, int *sigma, int *xi,
     eval_grad[0] = 0x1f;
     eval_grad[1] = 0x00;
     eval_grad[2] = 0x00;
+    if (!quiet) Rprintf("\riteration 0");
     res = objfun_6(PARA, sigma_xi, expec, GRAD);
+    if (!quiet) Rprintf("\tobj_fun = %.3f", res);
+    if (control_list[2]) Rprintf("\n");
 
     /*
     FILE *fgrad;
@@ -497,10 +500,10 @@ double optimize_6(double *PARA, int *sigma, int *xi,
     fclose(fh);
     */
 
-    if (!quiet) {
-	Rprintf("INITIALIZATION -- iteration %d\tobj_fun = %.3f\n", iter, res);
-	Rprintf("gradients done.\n");
-    }
+    /* if (!quiet) { */
+    /* 	Rprintf("Initialization: gradients done.\n"); */
+    /* 	Rprintf("iteration %d\tobj_fun = %.3f", iter, res); */
+    /* } */
 
     for (;;) {
 	if (iter >= iterlim) break;
@@ -586,6 +589,8 @@ update:
 		   (H + C) * sizeof(double));
 	}
 
+	if (!quiet) Rprintf("\riteration %d", iter + 1);
+
 	/* update the gradients (and 'res') */
 	eval_grad[0] = 0x1f;
 	eval_grad[1] = 0x00;
@@ -593,7 +598,10 @@ update:
 	res = objfun_6(ptr_para[Switch], sigma_xi, expec,
 		       ptr_grad[Switch]);
 
-	if (!quiet) Rprintf("\riteration %d\tobj_fun = %.3f", iter + 1, res);
+	if (!quiet) Rprintf("\tobj_fun = %.3f", res);
+	if (control_list[2]) Rprintf("\n");
+
+	/* if (!quiet) Rprintf("\riteration %d\tobj_fun = %.3f", iter + 1, res); */
 
 	if (res < target) break;
 	R_CheckUserInterrupt();
@@ -643,8 +651,6 @@ SEXP test_6(SEXP W1, SEXP W2, SEXP W3, SEXP BIAS_HH, SEXP BIAS_HC,
     KC = K * C;
     HC = H * C;
 
-    constant_1 = C * K * twiceBETA_CUBE;
-
     memcpy(&control_list, INTEGER(CTRL), 4 * sizeof(int));
 
     target = REAL(TARGET)[0];
@@ -654,6 +660,7 @@ SEXP test_6(SEXP W1, SEXP W2, SEXP W3, SEXP BIAS_HH, SEXP BIAS_HC,
     twiceBETA = 2 * BETA;
     twiceBETA_SQUARE = 2 * pow(BETA, 2);
     twiceBETA_CUBE = 2 * pow(BETA, 3);
+    constant_1 = C * K * twiceBETA_CUBE;
 
     w1 = REAL(W1);
     w2 = REAL(W2);

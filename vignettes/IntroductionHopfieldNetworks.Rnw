@@ -173,13 +173,14 @@ table(predict(net3, xi, rawsignal = FALSE), cl)
 The 3-layer net performed much better than the 1-layer one. Setting \code{iterlim} to a larger value can make the 3-layer network reach 0\% error. The literature on neural networks states that networks with no hidden layer fail to solve some problems even with very small data sets \cite{Elman1990, Krotov2016}.
 
 \section{Perspectives}
-The present document aims to give a quick overview of the possibilities of \pkg{hann}. The package is in its development stage; we see now the current and (possible) future lines of development.
+The present document aims to give a quick overview of the
+possibilities of \pkg{hann}. The package is in its development stage;
+the current and (possible) future lines of development are:
 
 \begin{itemize}
 \item Parallelization: there is an early attempt to use multicore based on OMP in \code{hann1()}. Therefore, this cannot be used together with functions from the package \pkg{parallel}. On the other hand, it is possible to run several optimizations in parallel, for instance with \code{parallel::mclapply()} if the OMP-based parallelization is off.
 \item Preparing databases for training: some works have been started on DNA.
 \end{itemize}
-
 
 
 \bibliographystyle{plain}

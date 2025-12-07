@@ -1,11 +1,23 @@
 useDynLib(hann, .registration = TRUE)
 
-export(buildSigma, control.hann, hann1, hann3)
+export(binarize, buildSigma, combine, control.hann, hann, hann1,
+       hann3, tune.hann)
 
-importFrom(stats, runif)
+importFrom(graphics, image, title)
+importFrom(stats, median, predict, runif, sd)
+
+S3method(coef, hann)
+S3method(fitted, hann)
+S3method(labels, hann)
+S3method(plot, hann)
+S3method(predict, hann)
+S3method(print, hann)
+S3method(str, hann)
+S3method(summary, hann)
 
 S3method(predict, hann1)
 S3method(print, hann1)
+
 S3method(predict, hann3)
 S3method(print, hann3)
 

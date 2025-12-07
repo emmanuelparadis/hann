@@ -6,7 +6,7 @@
   This optimizes a three-layer Hopfield-based artificial neural
   network. The network is made of a Hopfield network with N input
   neurons all connected to H hidden neurons. The latter are all
-  connected together (convoluation) which is equivalent to defining two
+  connected together (convolution) which is equivalent to defining two
   hidden layers. Each hidden neuron is connected to C output
   neurons. The values of the parameters N and C are determined by the
   input data: \code{xi} has N columns (which is also the length of
@@ -18,7 +18,7 @@
 }
 \usage{
 hann3(xi, sigma, classes,  H = 0.5 * length(sigma),
-      net = NULL, control = control.hann())
+      labels = NULL, net = NULL, control = control.hann())
 
 \method{print}{hann3}(x, details = FALSE, ...)
 }
@@ -26,10 +26,11 @@ hann3(xi, sigma, classes,  H = 0.5 * length(sigma),
   \item{xi}{a matrix of patterns with K rows.}
   \item{sigma}{a vector coding the Hopfield network.}
   \item{classes}{the classes of the patterns (vector of length K).}
-  \item{H}{the number of numbers in the hidden layer; by default half
+  \item{H}{the number of neurons in the hidden layer; by default half
     the number of input neurons (rounded to the lowest integer if the
     latter is odd).}
-  \item{net, x}{an object of class \code{"hann1"}.}
+  \item{labels}{a vector of labels used for the classes.}
+  \item{net, x}{an object of class \code{"hann3"}.}
   \item{control}{the control parameters.}
   \item{details}{a logical value (whether to print the parameter values
     of the network).}

@@ -1,20 +1,24 @@
-## hann3.R (2024-10-31)
+## hann3.R (2025-12-06)
 
 ##   Three-layer Hopfield ANN
 
-## Copyright 2024 Emmanuel Paradis
+## Copyright 2024-2025 Emmanuel Paradis
 
 ## This file is part of the R-package `hann'.
 ## See the file ../DESCRIPTION for licensing issues.
 
 hann3 <- function(xi, sigma, classes, H = 0.5 * length(sigma),
-                  net = NULL, control = control.hann())
+                  labels = NULL, net = NULL,
+                  control = control.hann())
 {
     H <- as.integer(H)
     K <- nrow(xi)
     N <- ncol(xi)
     expec <- initExpec(classes, K)
     C <- ncol(expec)
+
+    if (is.null(labels)) labels <- as.character(unique(classes))
+    if (length(labels) != C) stop("wrong number of labels")
 
     if (is.null(net)) {
         W1 <- initW(N, H)
@@ -45,8 +49,10 @@ hann3 <- function(xi, sigma, classes, H = 0.5 * length(sigma),
 
     res <- list(parameters = list(W1 = W1, W2 = W2, W3 = W3,
                                   bias1 = bias1, bias2 = bias2),
-                sigma = sigma, beta = beta, call = match.call())
-    class(res) <- "hann3"
+                sigma = sigma, beta = beta,  labels = labels,
+                call = match.call())
+    res$fitted <- predict.hann3(res, xi)
+    class(res) <- c("hann", "hann3")
     res
 }
 
@@ -60,16 +66,26 @@ print.hann3 <- function(x, details = FALSE, ...)
     if (details) print.default(x, ...)
 }
 
-predict.hann3 <- function(object, patterns, rawsignal = TRUE, ...)
+predict.hann3 <- function(object, patterns, rawsignal = TRUE,
+                          useLabels = TRUE, ...)
 {
-    K <- nrow(patterns)
-    H <- nrow(object$parameters$W2)
-    patterns <- patterns * rep(object$sigma, each = K)
-    res <- tanh(patterns %*% object$parameters$W1)
-    res <- tanh(object$beta * res %*% object$parameters$W2 +
-                rep(object$parameters$bias1, each = K))
-    res <- tanh(object$beta * res %*% object$parameters$W3 +
-                rep(object$parameters$bias2, each = K))
-    if (rawsignal) return(res)
-    apply(res, 1, which.max)
+    if (missing(patterns)) {
+        res <- object$fitted
+    } else {
+        K <- nrow(patterns)
+        H <- nrow(object$parameters$W2)
+        patterns <- patterns * rep(object$sigma, each = K)
+        res <- tanh(patterns %*% object$parameters$W1)
+        res <- tanh(object$beta * res %*% object$parameters$W2 +
+                    rep(object$parameters$bias1, each = K))
+        res <- tanh(object$beta * res %*% object$parameters$W3 +
+                    rep(object$parameters$bias2, each = K))
+    }
+    if (rawsignal) {
+        if (useLabels) colnames(res) <- object$labels
+        return(res)
+    }
+    res <- apply(res, 1, which.max)
+    if (useLabels) res <- object$labels[res]
+    res
 }

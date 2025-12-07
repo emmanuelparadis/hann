@@ -1,18 +1,22 @@
-## hann1.R (2024-10-31)
+## hann1.R (2025-12-06)
 
 ##   One-layer Hopfield ANN
 
-## Copyright 2024 Emmanuel Paradis
+## Copyright 2024-2025 Emmanuel Paradis
 
 ## This file is part of the R-package `hann'.
 ## See the file ../DESCRIPTION for licensing issues.
 
-hann1 <- function(xi, sigma, classes, net = NULL, control = control.hann())
+hann1 <- function(xi, sigma, classes, labels = NULL, net = NULL,
+                  control = control.hann())
 {
     K <- nrow(xi)
     N <- ncol(xi)
     expec <- initExpec(classes, K)
     C <- ncol(expec)
+
+    if (is.null(labels)) labels <- as.character(unique(classes))
+    if (length(labels) != C) stop("wrong number of labels")
 
     if (is.null(net)) {
         W <- initW(N, C)
@@ -35,8 +39,10 @@ hann1 <- function(xi, sigma, classes, net = NULL, control = control.hann())
     .Call(test_7, W, bias, sigma, xi, expec, iterlim,
           quiet, ctrl, target, beta, mc.cores)
     res <- list(parameters = list(W = W, bias = bias),
-                sigma = sigma, beta = beta, call = match.call())
-    class(res) <- "hann1"
+                sigma = sigma, beta = beta, labels = labels,
+                call = match.call())
+    res$fitted <- predict.hann1(res, xi)
+    class(res) <- c("hann", "hann1")
     res
 }
 
@@ -48,12 +54,22 @@ print.hann1 <- function(x, details = FALSE, ...)
     if (details) print.default(x, ...)
 }
 
-predict.hann1 <- function(object, patterns, rawsignal = TRUE, ...)
+predict.hann1 <- function(object, patterns, rawsignal = TRUE,
+                          useLabels = TRUE, ...)
 {
-    K <- nrow(patterns)
-    patterns <- patterns * rep(object$sigma, each = K)
-    res <- patterns %*% object$parameters$W
-    res <- tanh(object$beta * res + rep(object$parameters$bias, each = K))
-    if (rawsignal) return(res)
-    apply(res, 1, which.max)
+    if (missing(patterns)) {
+        res <- object$fitted
+    } else {
+        K <- nrow(patterns)
+        patterns <- patterns * rep(object$sigma, each = K)
+        res <- patterns %*% object$parameters$W
+        res <- tanh(object$beta * res + rep(object$parameters$bias, each = K))
+    }
+    if (rawsignal) {
+        if (useLabels) colnames(res) <- object$labels
+        return(res)
+    }
+    res <- apply(res, 1, which.max)
+    if (useLabels) res <- object$labels[res]
+    res
 }

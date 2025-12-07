@@ -1,6 +1,5 @@
 \name{hann-package}
 \alias{hann-package}
-\alias{hann}
 \docType{package}
 \title{
 Hopfield Artificial Neural Networks

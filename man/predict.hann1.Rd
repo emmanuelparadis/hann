@@ -7,13 +7,17 @@
   networks.
 }
 \usage{
-\method{predict}{hann1}(object, patterns, rawsignal = TRUE, ...)
-\method{predict}{hann3}(object, patterns, rawsignal = TRUE, ...)
+\method{predict}{hann1}(object, patterns, rawsignal = TRUE,
+        useLabels = TRUE, ...)
+\method{predict}{hann3}(object, patterns, rawsignal = TRUE,
+        useLabels = TRUE, ...)
 }
 \arguments{
   \item{object}{an object of class \code{"hann1"} or \code{"hann3"}.}
   \item{patterns}{the patterns to be classified.}
   \item{rawsignal}{a logical value (see details).}
+  \item{useLabels}{a logical value whether to use the labels of the
+    classes (if any) as colnames of the predictions.}
   \item{\dots}{(ignored).}
 }
 \details{

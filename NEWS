@@ -1,6 +1,28 @@
 		CHANGES IN HANN VERSION 1.1-3
 
 
+NEW FEATURES
+
+    o The new function combine makes predictions combining several
+      neural networks possibly optimized with different classes.
+
+    o The new function tune.hann helps to choose the hyperparameters
+      (number of hidden neurons and slope of the activation function).
+
+    o The new function hann is a wrapper for all types of neural
+      nets. The new class "hann" has 'secondary' classes "hann1" or
+      "hann3". There are several new methods: summary(), plot(),
+      coef(), fitted(), str(), and labels().
+
+    o The optimized networks now include an element $fitted with the
+      final signals, and an element $labels with the labels of the
+      input classes.
+
+    o The new function binarize helps to prepare the binary patterns
+      from vectors or matrices of numeric values (e.g., read from
+      image files).
+
+
 BUG FIXES
 
     o A bug has been fixed in the calculations of gradients of hann3()
