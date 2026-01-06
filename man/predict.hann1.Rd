@@ -18,7 +18,7 @@
   \item{rawsignal}{a logical value (see details).}
   \item{useLabels}{a logical value whether to use the labels of the
     classes (if any) as colnames of the predictions.}
-  \item{\dots}{(ignored).}
+  \item{\dots}{(unused).}
 }
 \details{
   The patterns have to be coded in the same way than the matrix
@@ -31,6 +31,5 @@
 \value{
   If \code{rawsignal = TRUE} a matrix; if \code{rawsignal = FALSE} a vector.
 }
-\author{Emmanuel Paradis}
 \seealso{\code{\link{hann1}}, \code{\link{hann3}}}
 \keyword{hmodel}

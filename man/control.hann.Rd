@@ -2,7 +2,7 @@
 \alias{control.hann}
 \title{Parameters for Neural Network Optimization}
 \description{
-  Set the parameters for the Hopfield artificial neural network
+  Set the control parameters for the Hopfield artificial neural network
   optimization.
 }
 \usage{
@@ -23,12 +23,12 @@ control.hann(...)
     iterations.
 
     \item \code{quiet = FALSE}: a logical controlling whether to print
-    the value of the objective (loss) function at each iteration.
+    the value of the objective function at each iteration.
 
     \item \code{quasinewton = FALSE}: a logical. If \code{TRUE},
-    quasi-Newton steps are performed (not recommended unless for
-    networks with few parameters and/or for a small number of
-    iterations).
+    quasi-Newton steps are performed (not recommended unless the
+    network has a small number of parameters and/or for a small number
+    of iterations).
 
     \item \code{fullhessian = FALSE}: (ignored if \code{quasinewton =
     FALSE}) a logical, by default only some blocks of the Hessian matrix
@@ -39,7 +39,7 @@ control.hann(...)
     error rate is printed at each iteration of the optimization process.
 
     \item \code{wolfe = FALSE}: a logical. If \code{TRUE}, Wolfe's
-    conditions are tested and printed at each iteration.
+    conditions are tested at each iteration.
 
     \item \code{target = 0.001}: the target value of the loss function
     to stop the optimization.
@@ -48,7 +48,7 @@ control.hann(...)
     function.
 
     \item \code{mc.cores = 1}: an integer. The number of cores used when
-    computing the loss function.
+    computing the objective function.
   }
 
   If \code{mc.cores} is greater than one, the optimization process calls
@@ -65,11 +65,10 @@ control.hann(...)
   \code{\link{hann1}}.
 }
 \value{a list with named elements as detailed above.}
-\author{Emmanuel Paradis}
 \references{
   \url{https://en.wikipedia.org/wiki/Wolfe_conditions}
 }
-\seealso{\code{\link{hann1}}}
+\seealso{\code{\link{hann}}}
 \examples{
 control.hann() # default values
 ctrl <- control.hann(iterlim = 1000)

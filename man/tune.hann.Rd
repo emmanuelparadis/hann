@@ -2,8 +2,8 @@
 \alias{tune.hann}
 \title{Tune Hyperparameters}
 \description{
-  Tuning the two hyperparameters of the neural nets: the number of
-  hidden neurons and beta (slope of the activation function).
+  Tune the two hyperparameters of the neural nets: the number of
+  hidden neurons (H) and the slope of the activation function (beta).
 }
 \usage{
 tune.hann(xi, sigma, classes,
@@ -22,9 +22,12 @@ tune.hann(xi, sigma, classes,
   \item{control}{the control parameters.}
 }
 \details{
+  This function is built on the same model than functions in the package
+  \pkg{e1071}.
+
   The effect of the hyperparameters is usually visible with a small
-  number of iterations of. The fitting process is repeat several times
-  for each combination of hyperparameter values.
+  number of iterations. The fitting process is repeated several times
+  for each combination of the hyperparameters.
 }
 \value{
   a data frame with four columns:
@@ -34,7 +37,6 @@ tune.hann(xi, sigma, classes,
   \item{mean}{the mean of the error rate computed over the repeats}
   \item{sd}{the standard-deviation}
 }
-\author{Emmanuel Paradis}
 \seealso{\code{\link{hann}}}
 \examples{
 ## simulate 200 random patterns with 30 pixels:

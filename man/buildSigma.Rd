@@ -16,7 +16,7 @@ buildSigma(xi, n = 20, nrep = 100, quiet = FALSE)
 }
 \details{
   The number of columns in \code{xi} is equal to the size of the
-  Hopfield network (i.e., the number of input neurons denoted as N),
+  Hopfield network (the number of input neurons denoted as N),
   whereas the number of columns is the number of memories denoted as K
   (Krotov and Hopfield, 2016).
 
@@ -33,8 +33,7 @@ buildSigma(xi, n = 20, nrep = 100, quiet = FALSE)
   Krotov, D. and Hopfield, J. J. (2016) Dense associative memory for
   pattern recognition. \doi{10.48550/ARXIV.1606.01164}.
 }
-\author{Emmanuel Paradis}
-\seealso{\code{\link{hann1}}}
+\seealso{\code{\link{hann}}}
 \examples{
 xi <- matrix(NA, K <- 1000, N <- 60)
 xi[] <- sample(c(1L, -1L), K * N, TRUE)

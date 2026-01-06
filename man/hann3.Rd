@@ -3,7 +3,7 @@
 \alias{print.hann3}
 \title{Three-layer Hopfield ANN}
 \description{
-  This optimizes a three-layer Hopfield-based artificial neural
+  Optimize a three-layer Hopfield artificial neural
   network. The network is made of a Hopfield network with N input
   neurons all connected to H hidden neurons. The latter are all
   connected together (convolution) which is equivalent to defining two
@@ -13,8 +13,6 @@
   \code{sigma}) and the number of unique values of \code{classes} is
   equal to C. The value of H must be given by the user (a default of
   half the number of input neurons is defined).
-
-  See the vignette of this package for an example.
 }
 \usage{
 hann3(xi, sigma, classes,  H = 0.5 * length(sigma),
@@ -23,14 +21,13 @@ hann3(xi, sigma, classes,  H = 0.5 * length(sigma),
 \method{print}{hann3}(x, details = FALSE, ...)
 }
 \arguments{
-  \item{xi}{a matrix of patterns with K rows.}
-  \item{sigma}{a vector coding the Hopfield network.}
+  \item{xi}{a matrix of patterns with K rows and N columns.}
+  \item{sigma}{a vector coding the Hopfield network (length N).}
   \item{classes}{the classes of the patterns (vector of length K).}
   \item{H}{the number of neurons in the hidden layer; by default half
-    the number of input neurons (rounded to the lowest integer if the
-    latter is odd).}
+    the number of input neurons (rounded to the lowest integer).}
   \item{labels}{a vector of labels used for the classes.}
-  \item{net, x}{an object of class \code{"hann3"}.}
+  \item{net, x}{an object inheriting class \code{"hann3"}.}
   \item{control}{the control parameters.}
   \item{details}{a logical value (whether to print the parameter values
     of the network).}
@@ -41,22 +38,25 @@ hann3(xi, sigma, classes,  H = 0.5 * length(sigma),
   random values from a uniform distribution between -1 and 1 (expect the
   biases which are initialized to zero).
 
-  If an object of \code{"hann3"} is given to the argument \code{net},
-  then its parameter values are used to initialize the parameters of the
-  network.
+  If an object inheriting class \code{"hann3"} is given to the argument
+  \code{net}, then its parameter values are used to initialize the
+  parameters of the network.
 
   The main control parameters are given as a list to the \code{control}
   argument. They are detaild in the page of the function
   \code{\link{control.hann}()}.
 }
 \value{
-  an object of class \code{"hann3"} with the following elements:
+  an object of class \code{c("hann", "hann3")} with the following elements:
 
   \item{parameters}{a list with three matrices, \code{W1}, \code{W2},
     and \code{W3}, and two vectors, \code{bias1} and \code{bias3}.}
   \item{sigma}{the Hopfield network.}
   \item{beta}{the hyperparameter of the activation function.}
+  \item{labels}{the labels of the classes.}
   \item{call}{the function call.}
+  \item{fitted}{the raw signals of the output neurons from the input
+    patterns.}
 }
 \references{
   Hopfield, J. J. (1982) Neural networks and physical systems with
@@ -67,9 +67,8 @@ hann3(xi, sigma, classes,  H = 0.5 * length(sigma),
   Krotov, D. and Hopfield, J. J. (2016) Dense associative memory for
   pattern recognition. \doi{10.48550/ARXIV.1606.01164}.
 }
-\author{Emmanuel Paradis}
 \seealso{
   \code{\link{buildSigma}}, \code{\link{control.hann}},
-  \code{\link{predict.hann3}}
+  \code{\link{hann}}, \code{\link{predict.hann3}}
 }
 \keyword{hmodel}

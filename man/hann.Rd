@@ -10,12 +10,12 @@
 \alias{predict.hann}
 \title{Method Top-Level Functions}
 \description{
-  Functions to fit Hopfield artificial neural networks and to access the
+  Functions to fit Hopfield artificial neural networks or to access the
   results.
 }
 \usage{
 hann(xi, sigma, classes, H = NULL, labels = NULL, net = NULL,
-    control = control.hann())
+     control = control.hann())
 \method{print}{hann}(x, ...)
 \method{summary}{hann}(object, ...)
 \method{str}{hann}(object, ...)
@@ -26,24 +26,29 @@ hann(xi, sigma, classes, H = NULL, labels = NULL, net = NULL,
 \method{predict}{hann}(object, ...)
 }
 \arguments{
-  \item{xi}{a matrix of patterns with K rows.}
-  \item{sigma}{a vector coding the Hopfield network.}
+  \item{xi}{a matrix of patterns with K rows and N columns.}
+  \item{sigma}{a vector coding the Hopfield network (length N).}
   \item{classes}{the classes of the patterns (vector of length K).}
   \item{H}{the number of neurons in the hidden layer (can be 0).}
   \item{labels}{a vector of labels used for the classes.}
-  \item{net, x, object}{an object ineriting class \code{"hann"}.}
+  \item{net, x, object}{an object inheriting class \code{"hann"}.}
   \item{control}{the control parameters.}
-  \item{y}{(ignored).}
+  \item{y}{(unused).}
   \item{type}{the type of plot for vectors of parameters (biases).}
   \item{\dots}{options passed to other methods.}
 }
 \details{
   \code{hann()} calls either \code{hann1()} or \code{hann3()} depending
-  on the value given to the argument \code{H}.
+  on the value given to the argument \code{H} (the number of hidden
+  neurons).
 
   The other functions are (standard) methods for accessing the results.
 }
-\author{Emmanuel Paradis}
+\value{
+  \code{hann} returns an object of class \code{c("hann", "hann1")} or
+  \code{c("hann", "hann3")}; see the links below for their description.
+}
+\seealso{\code{\link{hann1}}, \code{\link{hann3}}}
 \examples{
 ## function to create 'images' default size is 9x9 pixels,
 ## with 4 possible shapes ("V"ertical, "H"orizontal, "U"p-diag.
@@ -83,7 +88,7 @@ nt <- hann(xi, sig, cl, H = 10, control = ctr)
 
 table(cl, predict(nt, xi, rawsignal = FALSE))
 
-## new generate 10 new patterns...
+## now generate 10 new patterns...
 new_cl <- rep(labs, each = 10)
 new_xi <- binarize(t(sapply(new_cl, rpat)))
 ## ... and see how well they are predicted:
