@@ -1,8 +1,8 @@
-## common.R (2024-10-31)
+## common.R (2026-01-22)
 
 ##   Common Code
 
-## Copyright 2024 Emmanuel Paradis
+## Copyright 2024-2026 Emmanuel Paradis
 
 ## This file is part of the R-package `hann'.
 ## See the file ../DESCRIPTION for licensing issues.
@@ -37,7 +37,7 @@ initW <- function(NROW, NCOL, lower = -1, upper = 1)
 
 initExpec <- function(cls, K)
 {
-    cls <- factor(cls)
+    cls <- factor(cls, levels = unique(cls))
     C <- nlevels(cls)
     expec <- matrix(-1L, K, C)
     expec[cbind(1:K, as.integer(cls))] <- 1L

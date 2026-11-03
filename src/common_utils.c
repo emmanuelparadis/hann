@@ -34,7 +34,8 @@ double my_tanh(double x)
 /*     return x; */
 /* } */
 
-double runif_local() // x ~ U(-1, 1)
+/* x ~ U(-1, 1) */
+double runif_local()
 {
     double x;
 

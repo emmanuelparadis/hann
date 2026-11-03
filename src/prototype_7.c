@@ -1,6 +1,6 @@
-/* prototype_7.c    2025-11-17 */
+/* prototype_7.c    2026-01-26 */
 
-/* Copyright 2024-2025 Emmanuel Paradis */
+/* Copyright 2024-2026 Emmanuel Paradis */
 
 /* This file is part of the R-package `hann'. */
 /* See the file ../DESCRIPTION for licensing issues. */
@@ -14,6 +14,9 @@
 /* global parameters: */
 static int N, K, C, np1, npar, KC, mc_cores;
 static double target, BETA;
+
+/* arrays used at each iteration */
+double *O7, *Deviation, *bar_O7;
 
 /*
   control_list[0]: quasiNewton
@@ -44,9 +47,6 @@ static int control_list[4];
 #ifdef _OPENMP
 #include <omp.h>
 
-/* arrays used at each iteration */
-double *O7, *Deviation, *bar_O7;
-
 double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_grad)
 {
     omp_set_num_threads(mc_cores);
@@ -75,7 +75,7 @@ double objfun_7_OMP(double *PARA, double *sigma_xi, int *E, double *GRAD, int ev
 
     if (control_list[2]) {
 	k = do_error_rate(E, O7, K, C);
-	Rprintf("Error rate = %d / %d\n", k, K);
+	Rprintf("\tError rate = %d / %d", k, K);
     }
 
     if (eval_grad) {
@@ -206,7 +206,7 @@ double objfun_7(double *PARA, double *sigma_xi, int *E, double *GRAD, int eval_g
 
     if (control_list[2]) {
 	k = do_error_rate(E, O7, K, C);
-	Rprintf("Error rate = %d / %d\n", k, K);
+	Rprintf("\tError rate = %d / %d", k, K);
     }
 
     if (eval_grad) {
@@ -347,10 +347,10 @@ double optimize_7(double *PARA, int *sigma, int *xi,
     }
 
     /* do a first iteration to get the gradients: */
+    if (!quiet) Rprintf("\riteration 0");
     res = FUN(PARA, sigma_xi, expec, GRAD, 1);
-
-    if (!quiet) Rprintf("INITIALIZATION -- iteration %d\tobj_fun = %f\n", iter, res);
-    if (!quiet) Rprintf("Gradients done.\n");
+    if (!quiet) Rprintf("\tobj_fun = %.3f", res);
+    if (control_list[2]) Rprintf("\n");
 
     for (;;) {
 	if (iter >= iterlim) break;
@@ -431,18 +431,23 @@ update:
 	    memset(ptr_para[Switch] + np1, 0,
 		   C * sizeof(double));
 	}
+
+	if (!quiet) Rprintf("\riteration %d", iter + 1);
+
 	/* update the gradients (and 'res') */
 	res = FUN(ptr_para[Switch], sigma_xi, expec,
 		  ptr_grad[Switch], 1);
+
+	if (!quiet) Rprintf("\tobj_fun = %.3f", res);
+	if (control_list[2]) Rprintf("\n");
+
 	if (res < target) break;
 	R_CheckUserInterrupt();
 	iter++;
     }
 
     if (!quiet && iterlim) Rprintf("\n");
-
     if (Switch) memcpy(PARA, new_PARA, npar * sizeof(double));
-
     return res;
 }
 

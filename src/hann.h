@@ -1,6 +1,6 @@
-/* hann.h    2024-10-31 */
+/* hann.h    2026-01-26 */
 
-/* Copyright 2024 Emmanuel Paradis */
+/* Copyright 2024-2026 Emmanuel Paradis */
 
 /* This file is part of the R-package `hann'. */
 /* See the file ../DESCRIPTION for licensing issues. */
@@ -16,7 +16,7 @@
 #define bar(x) (1 - x * x)
 
 double my_tanh(double x);
-double runif_local();
+double runif_local(void);
 void fast_mat_prod_4(double *X, double *Y, double *Z, int n, int m, int p);
 void fast_mat_prod_0(double *X, double *Y, double *Z, int n, int m, int p);
 int fast_mat_inv(double *X, int n);

@@ -39,6 +39,7 @@ tune.hann(xi, sigma, classes,
 }
 \seealso{\code{\link{hann}}}
 \examples{
+\dontrun{
 ## simulate 200 random patterns with 30 pixels:
 v <- c(-1L, 1L)
 K <- 200L
@@ -59,5 +60,5 @@ str(res)
 library(lattice)
 levelplot(mean ~ beta * H, data = res, main = "Mean")
 levelplot(sd ~ beta * H, data = res, main = "Standard-deviation")
-}
+}}
 \keyword{hmodel}
