@@ -19,7 +19,7 @@ Hopfield networks have the property to be able to learn many patterns with a sma
 
 ## Installation
 
-hann is available on [CRAN](https://cran.r-project.org/package=hann) (ver. 1.1). You can get newer versions on [R-universe](https://emmanuelparadis.r-universe.dev/hann).
+hann is available on [CRAN](https://cran.r-project.org/package=hann) (ver. 1.2). You can get newer versions on [R-universe](https://emmanuelparadis.r-universe.dev/hann).
 
 It is recommended to have an efficient BLAS/LAPACK library installed on your system (e.g., [OpenBLAS](https://github.com/OpenMathLib/OpenBLAS)).
 
